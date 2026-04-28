@@ -137,3 +137,7 @@ Two things worth keeping:
 - **Defaults matter more than features.** "Drafts only", "no auto-publish", "redaction log on every run" are not constraints — they are the entire reason this skill is safe to use on a real working session. A capability without a paranoid default is a footgun.
 
 The skill lives in this same blog repo at [`skills/blog-post/`](https://github.com/jeanfbrito/jeanfbrito/tree/main/skills/blog-post) and is symlinked into `~/.claude/skills/` so Claude Code picks it up. The blog is at [jeanfbrito.github.io](https://jeanfbrito.github.io). The next post will be about something other than this blog, I promise.
+
+---
+
+*Written with [Claude Opus 4.7](https://www.anthropic.com/claude/opus) (`claude-opus-4-7`) via Claude Code.*
