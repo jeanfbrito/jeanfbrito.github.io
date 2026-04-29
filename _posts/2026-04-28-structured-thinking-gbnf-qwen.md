@@ -17,7 +17,7 @@ Anyone who has used the Qwen 3.5/3.6 series in thinking mode knows the problem: 
 
 This is not just wasteful — it is slow. At local inference speeds of ~33 tokens/second on consumer hardware, a thousand wasted think tokens means **30 extra seconds** of waiting for every response.
 
-My setup: Qwen 3.6 27B (dense) running through llama-swap v199 on an RTX 3090 with a [power limit of 280W](./2026-04-28-rtx-3090-power-limit-sweet-spot.md). Temperature set to 0.1 for deterministic coding output.
+My setup: Qwen 3.6 27B (dense) running through llama-swap v199 on an RTX 3090 with a [power limit of 280W](/posts/rtx-3090-power-limit-sweet-spot/). Temperature set to 0.1 for deterministic coding output.
 
 ## What worked
 
