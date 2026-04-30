@@ -1,15 +1,15 @@
 ---
 name: blog-post
-description: Convert the current Claude Code session into a publishable engineering blog post draft for jeanfbrito.github.io (Jekyll Chirpy). Trigger when the user says "/blog-post", "blog this", "turn this into a post", "write this up for the blog", or asks to share what was just built/learned with other engineers. The skill produces a draft saved into the blog repo's `_drafts/` directory so the user can review before publishing. Strips private/proprietary content, keeps reusable code, commands, and lessons.
+description: Convert a session, experiment, or benchmark into a publishable engineering blog post draft for jeanfbrito.github.io (Jekyll Chirpy). Trigger when the user says "blog this", "turn this into a post", "write this up for the blog", or asks to document something as a blog article. Produces a draft saved into the blog repo's _drafts/ directory so the user can review before publishing. Strips private/proprietary content, keeps reusable code, commands, and lessons.
 ---
 
 # /blog-post — Session Knowledge → Blog Draft
 
-Trigger: `/blog-post` (also: "blog this", "turn this into a post", "write up for blog")
+Trigger: "blog this", "turn this into a post", "write up for blog", "escreve um blog post sobre..."
 
-When invoked, distill the current session into a publishable draft for the user's Jekyll Chirpy blog at `https://jeanfbrito.github.io`. Output goes to `_drafts/` in the blog repo so the user reviews and publishes manually. **Never auto-publish. Never auto-commit. Never push.**
+When invoked, distill the session or topic into a publishable draft for the user's Jekyll Chirpy blog at `https://jeanfbrito.github.io`. Output goes to `_drafts/` in the blog repo so the user reviews and publishes manually. **Never auto-publish. Never auto-commit. Never push.**
 
-The blog repo lives at: `/Users/jean/Github/jeanfbrito/`
+The blog repo lives at: `/home/jean/projects/jeanfbrito.github.io`
 
 ## Hard rules — privacy
 
@@ -20,18 +20,18 @@ The user works at Rocket.Chat and on closed-source/client projects. Treat every 
 - API keys, tokens, passwords, secrets, env values, signed URLs
 - Internal hostnames, IPs, internal repo URLs, JIRA ticket IDs, Slack channels, customer/employer/client names beyond Rocket.Chat-public-OSS work
 - Code from private repos (Rocket.Chat private monorepo packages, client codebases). OSS Rocket.Chat OK if already public on GitHub.
-- File paths that reveal employer or client (e.g. anything under `/Users/jean/Documents/Claude/Projects/Rocket Engineering/...`)
+- File paths that reveal employer or client (e.g. anything under employer-specific directories)
 - Proprietary algorithms, internal architecture, schemas
 - Real names of coworkers, customers, or third parties (Jean Brito as author = OK)
-- Anything from `mm_search` results marked `project-shared` of a private project, or from `.claude/mytasks/` of a private project
 - Stack traces or logs that reveal internal infrastructure
 
 **Always allowed:**
 
 - The user's own personal projects (jeanfbrito/* repos), OSS contributions, public blog tooling
-- Generic shell commands, Claude Code skill patterns, Jekyll/Chirpy config, public docs URLs
+- Generic shell commands, Hermes Agent skill patterns, Jekyll/Chirpy config, public docs URLs
 - High-level lessons (e.g. "context-mode keeps diffs out of the window" — pattern, not secret)
 - Code snippets the user authored that contain no proprietary logic
+- Local LLM experiments, benchmarks, hardware reviews (RTX 3090, llama-swap, etc.)
 
 When in doubt, redact with `[REDACTED]` or paraphrase, AND surface it in the post-write report so the user can decide.
 
@@ -41,35 +41,33 @@ When in doubt, redact with `[REDACTED]` or paraphrase, AND surface it in the pos
 
 Before doing anything else, ask the user one short question (only if not already obvious from the trigger phrase):
 
-> "Which slice of this session do you want to blog about?
-> a) Everything since session start
-> b) Just the most recent task: <name the last completed task>
-> c) A specific topic: <ask>"
+> "Qual parte dessa sessão você quer transformar em post?
+> a) Tudo desde o início da sessão
+> b) Só a tarefa mais recente: <nomear última tarefa concluída>
+> c) Um tópico específico: <perguntar>"
 
-Default to (b) if user just said "/blog-post" with no qualifier and a clearly bounded recent task exists.
+Default to (b) if user just said "blog this" with no qualifier and a clearly bounded recent task exists.
 
 ### 2. Verify blog repo state
 
 ```bash
-ls /Users/jean/Github/jeanfbrito/_drafts/ 2>/dev/null || mkdir -p /Users/jean/Github/jeanfbrito/_drafts/
+ls /home/jean/projects/jeanfbrito.github.io/_drafts/ 2>/dev/null || mkdir -p /home/jean/projects/jeanfbrito.github.io/_drafts/
 ```
 
 Drafts dir must exist. Chirpy renders `_drafts/` only when running with `--drafts`, which is what we want — invisible until promoted.
 
-### 3. Capture session knowledge via context-mode
+### 3. Capture session context
 
-Mirror the `/commit` pattern: keep raw transcript out of main context. Index the relevant slice, then query.
+If the user has already extracted lessons or data in this session, prefer those — they are already structured summaries.
 
-If the user has already extracted lessons via `/mm-extract` or `/learn` this session, prefer those — they are already privacy-screened summaries.
-
-Otherwise, build context from the conversation directly. Summarize within your own context window (you already have the conversation), but for long sessions or attached logs, use:
+Otherwise, build context from the conversation directly. For long sessions, use context-mode tools to extract relevant portions:
 
 ```
 mcp__plugin_context-mode_context-mode__ctx_batch_execute(
   commands: [
-    {label: "git-log-blog", command: "git -C /Users/jean/Github/jeanfbrito log --oneline -20"},
-    {label: "git-status-blog", command: "git -C /Users/jean/Github/jeanfbrito status"},
-    {label: "existing-posts", command: "ls /Users/jean/Github/jeanfbrito/_posts/ /Users/jean/Github/jeanfbrito/_drafts/ 2>/dev/null"}
+    {label: "git-log-blog", command: "git -C /home/jean/projects/jeanfbrito.github.io log --oneline -20"},
+    {label: "git-status-blog", command: "git -C /home/jean/projects/jeanfbrito.github.io status"},
+    {label: "existing-posts", command: "ls /home/jean/projects/jeanfbrito.github.io/_posts/ /home/jean/projects/jeanfbrito.github.io/_drafts/ 2>/dev/null"}
   ]
 )
 ```
@@ -92,7 +90,7 @@ If fewer than two of {problem, approach, pitfall, takeaway} have non-trivial con
 
 Run a redaction sweep over every command, code block, path, and proper noun before writing the file:
 
-- Replace any path containing `Rocket Engineering`, `Documents/Claude/Projects`, or other employer/client tokens with a generic placeholder
+- Replace any path containing `Rocket Engineering`, employer-specific directories, or client tokens with a generic placeholder
 - Strip any Rocket.Chat internal URLs (anything not on github.com/RocketChat public repos)
 - Replace customer/coworker names with role descriptors ("a teammate", "a customer")
 - Scan code blocks for hardcoded secrets — refuse to include them, redact and warn
@@ -100,7 +98,7 @@ Run a redaction sweep over every command, code block, path, and proper noun befo
 
 ### 6. Write the draft
 
-Path: `/Users/jean/Github/jeanfbrito/_drafts/YYYY-MM-DD-<slug>.md`
+Path: `/home/jean/projects/jeanfbrito.github.io/_drafts/YYYY-MM-DD-<slug>.md`
 
 Slug: kebab-case, max 6 words, descriptive. Date: today (the user is in `America/Sao_Paulo`).
 
@@ -157,6 +155,22 @@ Body structure (use H2 for sections):
 - No emoji unless the user already used them in the session.
 - One model attribution footer at the very end (see step 7). No other "generated by" lines anywhere in the body.
 
+### Inter-post links (critical — breaks CI if wrong)
+
+The blog uses `permalink: /posts/:title/` in `_config.yml`. A post named `2026-04-28-rtx-3090-power-limit-sweet-spot.md` renders at `/posts/rtx-3090-power-limit-sweet-spot/` — **not** at the raw `.md` filename.
+
+**Always use Jekyll's `{% post_url %} tag for links between posts.** It survives slug/title changes and is what CI validates:
+
+```markdown
+[RTX 3090 Power Limit]({% post_url 2026-04-28-rtx-3090-power-limit-sweet-spot %})
+```
+
+The argument to `{% post_url %}` is the **filename without .md** (the full `YYYY-MM-DD-slug` part).
+
+**NEVER use relative paths like `./2026-04-28-xxx.md` or `/2026-04-28-xxx/`.** These work in local preview but break htmlproofer in CI because the rendered path follows the permalink format, not the filename.
+
+For cross-linking to drafts (not yet published): still use `{% post_url %}` — Jekyll resolves it correctly during `--drafts` preview.
+
 ### 7. Append model attribution
 
 Every draft ends with a single italic line below a horizontal rule that names the model and version that wrote it. This is for transparency with readers and so future sessions running this skill on different models behave consistently.
@@ -164,7 +178,7 @@ Every draft ends with a single italic line below a horizontal rule that names th
 **Identify the running model from the runtime context.** Sources, in order of preference:
 
 1. The system prompt or environment string the harness gave you at session start (it usually states the model family, friendly name, and exact model id).
-2. The provider SDK / CLI you are running inside (`claude`, `codex`, `ollama`, `llama.cpp`, `vllm`, `lm-studio`, `openrouter`, etc.).
+2. The provider SDK / CLI you are running inside (`hermes-agent`, `ollama`, `llama.cpp`, `vllm`, `lm-studio`, `openrouter`, etc.).
 3. If genuinely unknown, write `[unknown model]` and surface this in the uncertainty list — do not invent a name.
 
 **Footer format by model class:**
@@ -177,15 +191,7 @@ Every draft ends with a single italic line below a horizontal rule that names th
   *Written with [<Friendly Name>](<provider model page URL>) (`<exact-model-id>`) via <runtime>.*
   ```
 
-  Example for the current session running Claude Opus 4.7 inside Claude Code:
-
-  ```markdown
-  ---
-
-  *Written with [Claude Opus 4.7](https://www.anthropic.com/claude/opus) (`claude-opus-4-7`) via Claude Code.*
-  ```
-
-- **Open-weights / locally hosted** (Llama, Qwen, DeepSeek, Mistral-Open, etc., served via Ollama, llama.cpp, vLLM, LM Studio, MLX, etc.):
+- **Open-weights / locally hosted** (Llama, Qwen, DeepSeek, Mistral-Open, etc., served via llama-swap, Ollama, llama.cpp, vLLM, LM Studio, MLX, etc.):
 
   ```markdown
   ---
@@ -193,30 +199,25 @@ Every draft ends with a single italic line below a horizontal rule that names th
   *Written with [<Model Name + size/quant>](<HuggingFace model page URL>) via <runtime>.*
   ```
 
-  Example:
+  Example for the typical Hermes setup:
 
   ```markdown
   ---
 
-  *Written with [Qwen2.5-Coder-32B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct) via Ollama.*
+  *Written with [Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) (GGUF via [unsloth/Qwen3.6-27B-GGUF](https://huggingface.co/unsloth/Qwen3.6-27B-GGUF)) on RTX 3090 @ 280W through llama-swap v199.*
   ```
 
   Use the **canonical HuggingFace repo** of the model (the org's official upload, not a re-quant), unless the runtime is loading a specific quantization repo — in that case link the quant repo and mention the quant level (e.g. `Q4_K_M`).
 
 - **Hosted open-weights via API** (OpenRouter, Together, Groq serving Llama/Qwen, etc.): link the HuggingFace page for the underlying model and add the hosting provider in the runtime slot.
 
-  ```markdown
-  ---
-
-  *Written with [Llama-3.3-70B-Instruct](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct) (`meta-llama/llama-3.3-70b-instruct`) via OpenRouter.*
-  ```
-
 **Rules for any model:**
 
 - One line. Italic. Below a single `---` horizontal rule on its own line.
 - The model name links somewhere a reader can verify it exists.
+- For local GGUF models: include both the original HF link AND the GGUF repo link, plus hardware + inference engine.
 - The exact model id (or quant suffix) goes in backticks if it differs meaningfully from the friendly name.
-- The runtime is the agent harness or inference server the user actually ran (`Claude Code`, `Codex CLI`, `Ollama`, `llama.cpp`, `vLLM`, `LM Studio`, `OpenRouter`, etc.) — not a generic word like "AI" or "LLM".
+- The runtime is the agent harness or inference server the user actually ran (`Hermes Agent`, `llama-swap`, `Ollama`, `llama.cpp`, `vLLM`, `LM Studio`, `OpenRouter`, etc.) — not a generic word like "AI" or "LLM".
 - No co-author line. No "Generated by". No emoji. The footer is a fact line, not a brag line.
 
 ### 8. Report back
@@ -231,14 +232,14 @@ After writing, output to the user:
 6. Preview command:
 
 ```bash
-cd /Users/jean/Github/jeanfbrito && bundle exec jekyll s --drafts
+cd /home/jean/projects/jeanfbrito.github.io && bundle exec jekyll s --drafts
 ```
 
 7. Promotion command (do NOT run it — show it):
 
 ```bash
-mv /Users/jean/Github/jeanfbrito/_drafts/YYYY-MM-DD-<slug>.md \
-   /Users/jean/Github/jeanfbrito/_posts/YYYY-MM-DD-<slug>.md
+mv /home/jean/projects/jeanfbrito.github.io/_drafts/YYYY-MM-DD-<slug>.md \
+   /home/jean/projects/jeanfbrito.github.io/_posts/YYYY-MM-DD-<slug>.md
 ```
 
 ## Edge cases
