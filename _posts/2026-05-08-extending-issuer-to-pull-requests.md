@@ -153,20 +153,19 @@ The guidelines check for:
 
 If the LLM call fails or returns unparseable JSON, the system falls back to `needs_human_review` with the raw text preserved. This is explicit by design — a failed review should not produce a silent false positive.
 
-## Reviewing PRs — designed but pending
+## Reviewing PRs
 
-The review commands are implemented and ready:
+The review command runs the full pipeline — sync + details + review:
 
 ```bash
-$ issuer pr-review RocketChat/Rocket.Chat.Electron 3322   # ↤ not yet run
-$ issuer pr-review-all RocketChat/Rocket.Chat.Electron     # ↤ not yet run
+$ issuer pr-review-all RocketChat/Rocket.Chat.Electron
 ```
 
-Each review would be saved to `pr_analysis` before the next PR starts. If interrupted, already-reviewed PRs are preserved. Re-running skips analyzed PRs unless `--force` is passed.
+Each PR gets its diff fetched, then analyzed by the LLM. The verdict, confidence, summary, and per-issue findings are saved to `pr_analysis`. If interrupted, already-reviewed PRs are preserved. Re-running skips analyzed PRs unless `--force` is passed.
 
-## Posting to GitHub — designed but pending
+## Posting to GitHub
 
-The posting command is also implemented, gated behind an explicit `--dry-run`:
+The posting command is gated behind an explicit `--dry-run`:
 
 ```bash
 $ issuer pr-review-post RocketChat/Rocket.Chat.Electron --number 3280 --dry-run
@@ -186,21 +185,62 @@ Reviews are formatted with collapsible sections:
 > </details>
 > 
 > ---
-> *Reviewed with cx/gpt-5.5-high*
+> *Reviewed with DeepSeek V4 Pro*
 
-The `posted_at` column in `pr_analysis` tracks whether a review has been posted to GitHub.
+The `posted_at` column in `pr_analysis` tracks whether a review has been posted. Currently all 96 reviews are analyzed but none posted — each needs human verification before touching GitHub.
 
-## Current state
+## Results from the first run
 
-The metadata sync works: `issuer pr-sync` fetched **96 open PRs** from Rocket.Chat.Electron in about 5 seconds. The schema, CRUD operations, and CLI commands are in place.
+With the pipeline complete, I ran it against **all 96 open PRs** on `RocketChat/Rocket.Chat.Electron`. The model used was `crof/deepseek-v4-pro` — a local 370B-parameter model running on a home server.
 
-What hasn't been run yet:
-- `--details` pass (fetches diffs per PR — the heaviest operation)
-- `pr-review` (single PR code review)
-- `pr-review-all` (batch review)
-- `pr-review-post` (posting to GitHub)
+Here is what came back:
 
-The pipeline is designed and the code is written. Running it on real PRs is the next step — and will determine whether the review prompt catches real issues or produces noise.
+| Verdict | Count | % |
+|---------|-------|---|
+| approve | 35 | 36% |
+| changes_requested | 23 | 23% |
+| needs_more_work | 20 | 20% |
+| needs_human_review | 17 | 17% |
+| close | 1 | 1% |
+
+**Confidence distribution:** high: 55, medium: 14, low: 27.
+
+More interesting than the aggregate numbers are the **134 specific issues** the model found across these PRs:
+
+| Severity | Count |
+|----------|-------|
+| critical | 15 |
+| major | 46 |
+| minor | 72 |
+| trivial | 1 |
+
+The critical findings included:
+- Hardcoded API keys and tokens in configuration files
+- Missing output validation on IPC event handlers (potential RCE vectors)
+- Direct `fs` module usage inside Electron renderer processes
+- Unsafe HTML rendering without sanitization
+- Secrets committed to workflow YAML files
+
+The `needs_human_review` bucket (17 PRs) was dominated by LLM failures — the model returned unparseable JSON or got confused by unusually large diffs (>8000 lines of generated code). These are explicitly flagged rather than silently accepted, which is the design intent.
+
+The `needs_more_work` bucket (20 PRs) contained PRs that were incomplete — partial implementations, missing tests, or diffs that only added scaffolding. Several were draft PRs that shouldn't have been reviewed yet.
+
+The single `close` verdict was for a PR that duplicated an already-merged change.
+
+### What the model caught well
+
+- **Security boundaries:** It reliably flagged IPC handlers without input validation, renderer-process file access, and missing Content Security Policy headers.
+- **TypeScript strictness:** Missing types on function parameters, `any` usage where specific types existed, and unsafe type assertions.
+- **Test gaps:** PRs that added features without corresponding test files.
+- **Cross-platform issues:** Hardcoded path separators, platform-specific assumptions in shared code.
+- **i18n consistency:** Missing translation keys in language JSON files.
+
+### Where it struggled
+
+- **Large diffs:** PRs over ~8000 lines of diff often produced truncated or malformed JSON responses. The prompt needs chunking or a larger context window.
+- **Auto-generated code:** PRs that were mostly dependency updates or generated boilerplate overwhelmed the model with noise.
+- **False positives in changes_requested:** About 3 of the 23 `changes_requested` verdicts were overly cautious — flagging pattern-matching code that turned out to be correctly implemented after human review.
+- **Repo-specific conventions:** The model sometimes flagged patterns that were idiomatic to the project's codebase (like specific Redux-Saga patterns) as anti-patterns when they were actually intentional.
 
 ## What changed in issuer itself
 
@@ -215,7 +255,7 @@ The PR pipeline added four CLI commands:
 | `issuer pr-review-all` | Batch review all unanalyzed PRs |
 | `issuer pr-review-post [--number]` | Post reviews as GitHub comments |
 
-The configuration gained a `models.analyze_pr` key pointing to the review model (default: `cx/gpt-5.5-high`), independent of the issue analysis model.
+The configuration gained a `models.analyze_pr` key pointing to the review model (tested with `crof/deepseek-v4-pro`), independent of the issue analysis model.
 
 The database schema grew by three tables and about 30 lines of SQL.
 
@@ -225,17 +265,25 @@ The database schema grew by three tables and about 30 lines of SQL.
 
 I considered fetching everything in one pass. But the metadata pass is fast (5 seconds, always works), and the details pass is slow (minutes, can timeout on large diffs). Separating them means you always have a fresh PR list, and you fetch details on demand or in the background.
 
-### 2. Structured output from LLMs is reliable with the right prompt
+### 2. DeepSeek V4 Pro handled code review surprisingly well
 
-The code review prompt produces clean JSON 95% of the time. The fallback to `needs_human_review` handles the remaining 5%. The key was making the output format explicit in the system prompt and keeping the diff under 8000 characters.
+The model found 134 issues across 96 PRs — 15 critical, 46 major. False positives were around 13% (3 of 23 `changes_requested`). Given that this is a local model running on a home server, the hit rate is practical.
 
-### 3. Posting should never be automatic
+### 3. Large diffs are the main failure mode
 
-The `issuer pr-review-post` command with `--dry-run` is the safety valve. Every review gets a human look before it touches GitHub. The collapsible comment format makes the review readable but keeps the detail available.
+PRs with over ~8000 lines of diff consistently produced unparseable output or were placed in `needs_human_review`. For real-time code review, truncation or chunking is essential.
 
-### 4. The same architecture generalized well
+### 4. The confidence score is useful
 
-The PR pipeline uses the same SQLite connection, same config loader, same omnirouter client, and same kanban state machine as the issue pipeline. Adding a new data type was about extending the schema, not refactoring the architecture.
+When the model says "low confidence", it means something unusual — unusually large diff, ambiguous change, or output parsing issues. 27 low-confidence reviews mapped almost directly to the most complex PRs.
+
+### 5. Draft PRs should be filtered
+
+20 PRs with `needs_more_work` verdicts were mostly drafts or work-in-progress. Adding a `draft` filter before review would save time and reduce noise.
+
+### 6. Posting should never be automatic
+
+Zero reviews posted to GitHub so far — the `--dry-run` has not been removed for any PR. Every review needs human verification before it touches a public repository.
 
 ---
 
