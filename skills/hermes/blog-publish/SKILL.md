@@ -1,6 +1,6 @@
 ---
 name: blog-publish
-description: Promote a draft from _drafts/ to _posts/, commit, and push the blog repo. Use when the user wants to publish a blog post. Trigger: "publish blog", "publicar post", "promover draft", "push blog".
+description: 'Promote a draft from _drafts/ to _posts/, commit, and push the blog repo. Use when the user wants to publish a blog post. Trigger: "publish blog", "publicar post", "promover draft", "push blog".'
 ---
 
 # Blog Publish — Promote Draft → Posts → Push

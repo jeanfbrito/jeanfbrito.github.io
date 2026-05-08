@@ -153,48 +153,28 @@ The guidelines check for:
 
 If the LLM call fails or returns unparseable JSON, the system falls back to `needs_human_review` with the raw text preserved. This is explicit by design — a failed review should not produce a silent false positive.
 
-## Reviewing PRs
+## Reviewing PRs — designed but pending
 
-Single PR review:
-
-```bash
-$ issuer pr-review RocketChat/Rocket.Chat.Electron 3322
-Reviewing PR #3322 with crof/deepseek-v4-pro...
-  Verdict: approve (confidence: high)
-
-=== Review Result ===
-Verdict: approve
-Confidence: high
-Summary: Rotates provisioning profile and adds a Jest test that...
-```
-
-Batch review of all unanalyzed PRs:
+The review commands are implemented and ready:
 
 ```bash
-$ issuer pr-review-all RocketChat/Rocket.Chat.Electron --limit 5
-Reviewing 5/12 unanalyzed PRs...
-
-[1/5] PR #3280: feat: add DISABLE_AUTO_UPDATES property to MSI installer
-  Verdict: changes_requested (confidence: high)
+$ issuer pr-review RocketChat/Rocket.Chat.Electron 3322   # ↤ not yet run
+$ issuer pr-review-all RocketChat/Rocket.Chat.Electron     # ↤ not yet run
 ```
 
-Each review is saved to `pr_analysis` before the next PR starts. If the process is interrupted, the already-reviewed PRs are preserved. Re-running skips analyzed PRs unless `--force` is passed.
+Each review would be saved to `pr_analysis` before the next PR starts. If interrupted, already-reviewed PRs are preserved. Re-running skips analyzed PRs unless `--force` is passed.
 
-## Posting to GitHub
+## Posting to GitHub — designed but pending
 
-The final step is posting the review as a GitHub comment. This is gated behind an explicit command — never automatic:
+The posting command is also implemented, gated behind an explicit `--dry-run`:
 
 ```bash
 $ issuer pr-review-post RocketChat/Rocket.Chat.Electron --number 3280 --dry-run
-
-=== DRY RUN: PR #3280 ===
-## 🔴 AI Code Review — changes requested
-...
 ```
 
-The `--dry-run` flag prints the comment to stdout without posting. Only when the user removes `--dry-run` does the tool run `gh pr comment`.
+The `--dry-run` flag prints the comment to stdout without posting. Only when removed does the tool run `gh pr comment`.
 
-Reviews are formatted with collapsible sections for the detailed text, keeping the comment readable on GitHub:
+Reviews are formatted with collapsible sections:
 
 > **Verdict:** changes requested  
 > **Confidence:** high  
@@ -208,23 +188,19 @@ Reviews are formatted with collapsible sections for the detailed text, keeping t
 > ---
 > *Reviewed with cx/gpt-5.5-high*
 
-The `posted_at` column in `pr_analysis` is set after successful posting, so the tool knows what has and hasn't been posted.
+The `posted_at` column in `pr_analysis` tracks whether a review has been posted to GitHub.
 
-## Results from the first run
+## Current state
 
-On the Rocket.Chat.Electron repository, the pipeline synced **96 open PRs** in the first pass. Of those, the first 5 reviewed by the LLM produced:
+The metadata sync works: `issuer pr-sync` fetched **96 open PRs** from Rocket.Chat.Electron in about 5 seconds. The schema, CRUD operations, and CLI commands are in place.
 
-- **3 approves** — clean PRs with proper test coverage
-- **2 changes requested** — one had a potential IPC security concern, one had missing edge case handling
+What hasn't been run yet:
+- `--details` pass (fetches diffs per PR — the heaviest operation)
+- `pr-review` (single PR code review)
+- `pr-review-all` (batch review)
+- `pr-review-post` (posting to GitHub)
 
-The false-positive rate for the `changes_requested` verdicts was verified manually — both were legitimate concerns that the maintainer addressed before merge.
-
-The tool reliably caught:
-- Missing validation on IPC event handlers
-- Unhandled promise rejections in async event handlers
-- Direct `fs` usage in renderer process (should go through IPC)
-- Missing TypeScript strict mode compliance
-- Incomplete test coverage in new feature branches
+The pipeline is designed and the code is written. Running it on real PRs is the next step — and will determine whether the review prompt catches real issues or produces noise.
 
 ## What changed in issuer itself
 
