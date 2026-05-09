@@ -45,10 +45,11 @@ For rich sessions, generate 2+ interconnected posts. Evaluate whether the sessio
 
 1. **Scan the session** for the key narrative: what problem → what solution → how it works → what happened → lessons learned
 2. **Split across posts** if the material naturally divides (architecture vs scale, build vs deploy, theory vs practice)
-3. **Generate drafts** via LLM call to an appropriate model — pass structured prompt with the session's technical narrative, architecture highlights, and concrete data
-4. **Review against the editor's checklist** below before saving
-5. **Save to `_drafts/`** with filename `YYYY-MM-DD-slug.md`
-6. **Report back** with the filenames, word counts, and a summary of each post's content
+3. **Check the date first** — run `date` before writing front matter. Timezone is -03 (BRT). Never guess.
+4. **Generate drafts** via LLM call to an appropriate model — pass structured prompt with the session's technical narrative, architecture highlights, and concrete data
+5. **Review against the editor's checklist** below before saving
+6. **Save to `_drafts/`** with filename `YYYY-MM-DD-slug.md` (date MUST match today's system date)
+7. **Report back** with the filenames, word counts, and a summary of each post's content
 
 ## Drafting — editor's checklist (before saving)
 
