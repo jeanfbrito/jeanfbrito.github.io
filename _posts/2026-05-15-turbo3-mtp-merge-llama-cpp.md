@@ -1,6 +1,6 @@
 ---
-title: "262K Context + MTP: Merging Two llama.cpp Forks"
-date: 2026-05-15 19:30:00 -0300
+title: "Turbo3 + MTP: Merging Two llama.cpp Forks"
+date: 2026-05-15 15:30:00 -0300
 categories: [AI, Local LLMs]
 tags: [llama.cpp, cuda, rtx3090, speculative-decoding, mtp, quantization, ggml, turboQuant]
 description: "Merging turbo3 KV cache and MTP speculative decoding into one llama.cpp binary: the build crashes, the CUDA dispatch bug, and 252K context at 85% draft acceptance."
