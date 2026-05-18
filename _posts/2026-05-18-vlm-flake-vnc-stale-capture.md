@@ -1,6 +1,6 @@
 ---
 title: "When your VLM test flake is actually a VNC capture race"
-date: 2026-05-18 14:20:00 -0300
+date: 2026-05-18 11:15:00 -0300
 categories: [Engineering, Testing]
 tags: [vnc, rfb, vlm, ui-automation, testing, debugging, electron, race-condition]
 description: "Spent half a session tuning VLM localize prompts. The real bug was deep in my RFB client: framebuffer captures were 1–N frames behind reality."
