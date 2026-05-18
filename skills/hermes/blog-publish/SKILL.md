@@ -19,14 +19,29 @@ ls -la /home/jean/projects/jeanfbrito.github.io/_drafts/
 
 If the user specified a particular post, skip the listing and go straight to it.
 
-### 2. Move draft to posts
+### 2. Verify the post date is not in the future
+
+**BLOCKING CHECK.** Read the `date:` line from the draft's front matter and compare against the shell. If the front-matter date is greater than `date "+%Y-%m-%d %H:%M:%S %z"`, Jekyll silently drops the post (this site has no `--future` flag in `_config.yml`) and it won't render on GitHub Pages until that timestamp passes. The user has been bitten by this twice — do not skip.
+
+```bash
+NOW=$(date "+%Y-%m-%d %H:%M:%S %z")
+POST_DATE=$(grep -m1 '^date:' /home/jean/projects/jeanfbrito.github.io/_drafts/YYYY-MM-DD-<slug>.md | sed 's/^date:[[:space:]]*//')
+echo "now:  $NOW"
+echo "post: $POST_DATE"
+# If post > now: edit the draft's date: line to NOW verbatim BEFORE the move/commit/push.
+# Do not "round" or "add buffer" — copy the shell output as-is.
+```
+
+If the date is in the future, edit the draft's `date:` field to the current shell timestamp before continuing. Mention the correction in your final report.
+
+### 3. Move draft to posts
 
 ```bash
 mv /home/jean/projects/jeanfbrito.github.io/_drafts/YYYY-MM-DD-<slug>.md \
    /home/jean/projects/jeanfbrito.github.io/_posts/YYYY-MM-DD-<slug>.md
 ```
 
-### 3. Commit
+### 4. Commit
 
 ```bash
 cd /home/jean/projects/jeanfbrito.github.io && git add _posts/YYYY-MM-DD-<slug>.md
@@ -35,13 +50,13 @@ git commit -m "Publish: <title from front matter>"
 
 Extract the title from the file's front matter for the commit message. Keep it under 60 chars.
 
-### 4. Push
+### 5. Push
 
 ```bash
 git push
 ```
 
-### 5. Report back
+### 6. Report back
 
 Tell the user:
 - Commit hash and message

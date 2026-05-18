@@ -67,6 +67,8 @@ Before finalizing the draft, run through this checklist. If any check fails, reg
 
 ## Front matter template (Jekyll Chirpy)
 
+**Date — MUST be read from the shell, never guessed.** Run `date "+%Y-%m-%d %H:%M:%S %z"` and paste the literal output into the `date:` field. Future-dated posts are silently dropped by Jekyll (no `--future` flag in this site's `_config.yml`) and the user has been bitten by this twice. No "round up", no "buffer", no "looks about right" — copy the shell timestamp verbatim. Filename `YYYY-MM-DD-slug.md` must match the date portion.
+
 ```yaml
 ---
 title: "Post Title Here"
