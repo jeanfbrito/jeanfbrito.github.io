@@ -217,4 +217,4 @@ Review your containers. Kill the ones you don't need. Build the ones you keep in
 
 ---
 
-*Written with [GPT-5.5 High](https://openai.com/codex/)*
+*Written with [Mimo v2.5 Pro](https://crof.ai/models/mimo)*
