@@ -9,7 +9,29 @@ Trigger: "blog this", "turn this into a post", "write up for blog", "escreve um 
 
 When invoked, distill the session or topic into a publishable draft for the user's Jekyll Chirpy blog at `https://jeanfbrito.github.io`. Output goes to `_drafts/` in the blog repo so the user reviews and publishes manually. **Never auto-publish. Never auto-commit. Never push.**
 
-The blog repo lives at: `/home/jean/projects/jeanfbrito.github.io`
+## Resolve the blog repo path
+
+At the start of every run, resolve the blog repo path in this order and store in `$BLOG_REPO`:
+
+1. Use `$JEANFBRITO_BLOG_REPO` if set in the environment.
+2. Use `$HOME/projects/jeanfbrito.github.io` if it exists (historical Hermes path).
+3. Use `$HOME/Github/jeanfbrito` if it is a git repo.
+4. Otherwise stop and ask the user.
+
+```bash
+if [ -n "$JEANFBRITO_BLOG_REPO" ]; then
+  BLOG_REPO="$JEANFBRITO_BLOG_REPO"
+elif [ -d "$HOME/projects/jeanfbrito.github.io" ]; then
+  BLOG_REPO="$HOME/projects/jeanfbrito.github.io"
+elif git -C "$HOME/Github/jeanfbrito" rev-parse --git-dir >/dev/null 2>&1; then
+  BLOG_REPO="$HOME/Github/jeanfbrito"
+else
+  echo "Blog repo not found. Set JEANFBRITO_BLOG_REPO or clone jeanfbrito.github.io first."
+  exit 1
+fi
+```
+
+All later commands reference `$BLOG_REPO` instead of a hardcoded path.
 
 ## Hard rules — privacy
 

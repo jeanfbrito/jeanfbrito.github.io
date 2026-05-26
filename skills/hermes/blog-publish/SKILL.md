@@ -7,6 +7,28 @@ description: 'Promote a draft from _drafts/ to _posts/, commit, and push the blo
 
 Moves a draft from `_drafts/` to `_posts/`, commits, and pushes to GitHub Pages so it goes live on `jeanfbrito.github.io`.
 
+## Resolve the blog repo path
+
+At the start of every run, resolve the blog repo path in this order:
+
+1. Use `$JEANFBRITO_BLOG_REPO` if set in the environment.
+2. Check if `~/projects/jeanfbrito.github.io` exists (historical Hermes path).
+3. Check if `~/Github/jeanfbrito` exists and is a git repo.
+4. If none of the above resolves, stop and ask the user for the path.
+
+```bash
+if [ -n "$JEANFBRITO_BLOG_REPO" ]; then
+  BLOG_REPO="$JEANFBRITO_BLOG_REPO"
+elif [ -d "$HOME/projects/jeanfbrito.github.io" ]; then
+  BLOG_REPO="$HOME/projects/jeanfbrito.github.io"
+elif git -C "$HOME/Github/jeanfbrito" rev-parse --git-dir >/dev/null 2>&1; then
+  BLOG_REPO="$HOME/Github/jeanfbrito"
+else
+  echo "Blog repo not found. Set JEANFBRITO_BLOG_REPO or clone jeanfbrito.github.io first."
+  exit 1
+fi
+```
+
 ## Workflow
 
 ### 1. Confirm scope
@@ -14,7 +36,7 @@ Moves a draft from `_drafts/` to `_posts/`, commits, and pushes to GitHub Pages 
 List available drafts and ask which one(s) to publish:
 
 ```bash
-ls -la /home/jean/projects/jeanfbrito.github.io/_drafts/
+ls -la "$BLOG_REPO/_drafts/"
 ```
 
 If the user specified a particular post, skip the listing and go straight to it.
@@ -37,14 +59,14 @@ If the date is in the future, edit the draft's `date:` field to the current shel
 ### 3. Move draft to posts
 
 ```bash
-mv /home/jean/projects/jeanfbrito.github.io/_drafts/YYYY-MM-DD-<slug>.md \
-   /home/jean/projects/jeanfbrito.github.io/_posts/YYYY-MM-DD-<slug>.md
+mv "$BLOG_REPO/_drafts/YYYY-MM-DD-<slug>.md" \
+   "$BLOG_REPO/_posts/YYYY-MM-DD-<slug>.md"
 ```
 
 ### 4. Commit
 
 ```bash
-cd /home/jean/projects/jeanfbrito.github.io && git add _posts/YYYY-MM-DD-<slug>.md
+cd "$BLOG_REPO" && git add "_posts/YYYY-MM-DD-<slug>.md"
 git commit -m "Publish: <title from front matter>"
 ```
 

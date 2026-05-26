@@ -17,9 +17,9 @@ skills/hermes/
 Each skill lives as a regular directory under `skills/hermes/`. On the local machine, Hermes loads skills from `~/.hermes2/skills/`, so **symlinks** connect the two:
 
 ```bash
-~/.hermes2/skills/blog-post    →  ~/projects/jeanfbrito.github.io/skills/hermes/blog-post
-~/.hermes2/skills/blog-preview →  ~/projects/jeanfbrito.github.io/skills/hermes/blog-preview
-~/.hermes2/skills/blog-publish →  ~/projects/jeanfbrito.github.io/skills/hermes/blog-publish
+~/.hermes2/skills/blog-post    →  ~/Github/jeanfbrito/skills/hermes/blog-post
+~/.hermes2/skills/blog-preview →  ~/Github/jeanfbrito/skills/hermes/blog-preview
+~/.hermes2/skills/blog-publish →  ~/Github/jeanfbrito/skills/hermes/blog-publish
 ```
 
 This means:
@@ -30,13 +30,24 @@ This means:
 ## Skills
 
 ### blog-post
-Writes a polished engineering blog post draft based on the current session or a user-provided topic. Follows Chirpy Jekyll front matter format and applies strict privacy redaction rules. See `skills/hermes/blog-post/SKILL.md` for the full workflow.
+Writes a polished engineering blog post draft based on the current session or a user-provided topic. Follows Chirpy Jekyll front matter format and applies strict privacy redaction rules. Detects the blog repo location automatically. See `skills/hermes/blog-post/SKILL.md` for the full workflow.
 
 ### blog-preview
-Starts `bundle exec jekyll s --drafts` on port 4001 (avoiding Docker proxy on port 4000). Reports local and LAN URLs for browser preview.
+Starts `bundle exec jekyll s --drafts` on port 4001 (avoiding Docker proxy on port 4000). Reports local and LAN URLs for browser preview. Cross-platform (macOS and Linux).
 
 ### blog-publish
-Moves a draft from `_drafts/` to `_posts/`, commits with the article title, and pushes to GitHub Pages.
+Moves a draft from `_drafts/` to `_posts/`, commits with the article title, and pushes to GitHub Pages. Detects blog repo location automatically.
+
+## Blog repo detection
+
+All three skills auto-detect the blog repo at runtime (no hardcoded path). Resolution order:
+
+1. `$JEANFBRITO_BLOG_REPO` env var if set
+2. `~/projects/jeanfbrito.github.io` if it exists (historical Hermes path)
+3. `~/Github/jeanfbrito` if it exists and is a git repo
+4. Ask the user
+
+Set `JEANFBRITO_BLOG_REPO` in your shell profile if you keep the repo in a non-standard location.
 
 ## Creating a symlink on a new machine
 
