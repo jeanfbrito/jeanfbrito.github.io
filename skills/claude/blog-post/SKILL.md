@@ -51,7 +51,7 @@ The user works at Rocket.Chat and on closed-source/client projects. Treat every 
 
 **Always allowed:**
 
-- The user's own personal projects (jeanfbrito/* repos), OSS contributions, public blog tooling
+- The user's own personal projects (jeanfbrito/\* repos), OSS contributions, public blog tooling
 - Generic shell commands, Claude Code skill patterns, Jekyll/Chirpy config, public docs URLs
 - High-level lessons (e.g. "context-mode keeps diffs out of the window" — pattern, not secret)
 - Code snippets the user authored that contain no proprietary logic
@@ -100,11 +100,15 @@ For follow-up specifics use `mcp__plugin_context-mode_context-mode__ctx_search` 
 
 ### 4. Extract narrative
 
+Before drafting, load `~/Github/agent-skills/shared/tone.md` and apply it —
+especially real numbers only, customer anonymization, and the reread+grep
+gate before the draft is considered done.
+
 From the session, identify in this order:
 
 1. **The problem** — what triggered the work? One concrete sentence.
 2. **The approach** — what strategy/tools were chosen, and why.
-3. **The key steps** — 3–6 substantive moments. Include exact commands, code, file diffs that are *generic enough to share*.
+3. **The key steps** — 3–6 substantive moments. Include exact commands, code, file diffs that are _generic enough to share_.
 4. **The pitfall(s)** — what went wrong, what was unintuitive, what cost time. This is the most valuable section for readers — never skip if it exists.
 5. **The takeaway** — one transferable lesson. What should another engineer remember?
 
@@ -118,7 +122,7 @@ Run a redaction sweep over every command, code block, path, and proper noun befo
 - Strip any Rocket.Chat internal URLs (anything not on github.com/RocketChat public repos)
 - Replace customer/coworker names with role descriptors ("a teammate", "a customer")
 - Scan code blocks for hardcoded secrets — refuse to include them, redact and warn
-- If the session touched a private repo and the post leans on that work, the post should describe the *technique*, not the codebase
+- If the session touched a private repo and the post leans on that work, the post should describe the _technique_, not the codebase
 
 ### 6. Write the draft
 
@@ -132,7 +136,7 @@ Front matter (Chirpy):
 ---
 title: <Concrete, specific, no clickbait. Under 60 chars.>
 date: YYYY-MM-DD HH:MM:SS -0300
-categories: [<top-level>, <sub>]   # 1–2 entries, e.g. [AI, Tooling]
+categories: [<top-level>, <sub>] # 1–2 entries, e.g. [AI, Tooling]
 tags: [<5–8 lowercase tags>]
 description: <140–160 char summary for SEO/social>
 pin: false
@@ -212,7 +216,7 @@ Every draft ends with a single italic line below a horizontal rule that names th
   ```markdown
   ---
 
-  *Written with [<Friendly Name>](<provider model page URL>) (`<exact-model-id>`) via <runtime>.*
+  _Written with [<Friendly Name>](<provider model page URL>) (`<exact-model-id>`) via <runtime>._
   ```
 
 - **Open-weights / locally hosted** (Llama, Qwen, DeepSeek, Mistral-Open, etc., served via llama-swap, Ollama, llama.cpp, vLLM, LM Studio, MLX, etc.):
@@ -220,7 +224,7 @@ Every draft ends with a single italic line below a horizontal rule that names th
   ```markdown
   ---
 
-  *Written with [<Model Name + size/quant>](<HuggingFace model page URL>) via <runtime>.*
+  _Written with [<Model Name + size/quant>](<HuggingFace model page URL>) via <runtime>._
   ```
 
   Example for a local setup:
@@ -228,7 +232,7 @@ Every draft ends with a single italic line below a horizontal rule that names th
   ```markdown
   ---
 
-  *Written with [Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) (GGUF via [unsloth/Qwen3.6-27B-GGUF](https://huggingface.co/unsloth/Qwen3.6-27B-GGUF)) on RTX 3090 @ 280W through llama-swap v199.*
+  _Written with [Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) (GGUF via [unsloth/Qwen3.6-27B-GGUF](https://huggingface.co/unsloth/Qwen3.6-27B-GGUF)) on RTX 3090 @ 280W through llama-swap v199._
   ```
 
   Use the **canonical HuggingFace repo** of the model (the org's official upload, not a re-quant), unless the runtime is loading a specific quantization repo — in that case link the quant repo and mention the quant level (e.g. `Q4_K_M`).
