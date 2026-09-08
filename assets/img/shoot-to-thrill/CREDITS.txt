@@ -1,0 +1,45 @@
+Shoot to Thrill — Building Gunfeel series media
+Prepared 2026-09-08. Public draft media, not a source-code release.
+
+PROTOTYPE IMAGES AND VIDEO
+Rendering and animation by Jean Brito.
+Rifle visuals adapted from “Low-Poly M4a1” by TastyTony:
+https://sketchfab.com/3d-models/low-poly-m4a1-8cab1cbeb82c4396a154f9fc8771417b
+Licensed under Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+The model was adapted and animated for this prototype presentation.
+
+Arm visuals adapted from FPS-animation-POC:
+https://github.com/rdstrcorpse/FPS-animation-POC
+MIT copyright (c) 2024 ZeEndy. Full notice: arm-visuals-license.txt.
+These files contain rendered output only; no model files are distributed.
+
+CAPTURE SCOPE
+Both PNG stills and both MP4 clips use an earlier handling checkpoint.
+They do not depict the later unresolved walking/contact candidate.
+The source recording passed its render guard with 1,201 contiguous unique
+rendered markers numbered 1 through 1,201. The public viewing copies are:
+- handling-sequence.mp4: first 1,200 source frames, 20 seconds at 60 FPS.
+- recoil-sequence.mp4: source frames 481–720, 4 seconds at 60 FPS.
+- prototype-ready.png: unchanged source frame 120.
+- recoil-poster.png: unchanged source frame 620.
+Video is encoded as H.264 at 1280 x 720, normal speed, without audio.
+The original PNG sequence established the render checks; lossy viewing
+copies are intended for visual review. Fixture telemetry uses its own
+frame clock and is not asserted to align exactly to encoded video frames.
+
+CHARTS AND DATA
+Charts by Jean Brito with Codex assistance, generated from recorded
+prototype measurements. measurements.json supplies public chart values,
+units, and limitations. The walking candidate remains unaccepted.
+These measurements are not firearm physics or reference-game parameters.
+Output-size charts measure bytes, not model tokens, time, or billing.
+
+CODE EXAMPLES
+examples.py contains newly written standalone teaching examples, not
+private game implementation. The examples are intentionally incomplete
+as production validators; each article explains their scope.
+
+EXTERNAL REFERENCE FOOTAGE
+Links in the articles lead to the original creators' pages. External
+footage has not been copied into this media directory.
