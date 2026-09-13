@@ -1,6 +1,6 @@
 ---
 name: blog-post
-description: Convert a session, experiment, or benchmark into a publishable engineering blog post draft for jeanfbrito.github.io (Jekyll Chirpy). Trigger when the user says "blog this", "turn this into a post", "write this up for the blog", or asks to document something as a blog article. Produces a draft saved into the blog repo's _drafts/ directory so the user can review before publishing. Strips private/proprietary content, keeps reusable code, commands, and lessons.
+description: "Draft an engineering post for jeanfbrito.github.io from a session, experiment, or benchmark when a blog write-up is requested."
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

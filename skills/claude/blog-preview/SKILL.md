@@ -1,6 +1,6 @@
 ---
 name: blog-preview
-description: Start the Jekyll development server for jeanfbrito.github.io with drafts visible. Use when the user wants to preview blog posts locally before publishing. Trigger: "preview blog", "rodar blog", "ver o blog local", "serve blog".
+description: "Start the local Jekyll preview for jeanfbrito.github.io with drafts visible when a blog preview is requested."
 allowed-tools: Bash
 ---
 
