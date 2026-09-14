@@ -2,7 +2,7 @@
 title: "Qwen 3.6 Dense vs MOE on Local Stack: what MTP actually delivers"
 date: 2026-05-13 20:02:18 -0300
 categories: [AI, Engineering]
-tags: [llama.cpp, Qwen, MTP, MOE, speculative-decoding, GGUF, CUDA]
+tags: [llama-cpp, qwen, mtp, moe, speculative-decoding, gguf, cuda]
 description: "Practical comparison between Qwen 3.6 Dense and MOE on an RTX 3090, focused on real throughput by scenario and the practical impact of Multi-Token Prediction in local inference flow."
 pin: false
 math: false

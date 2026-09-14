@@ -2,7 +2,7 @@
 title: "Running Qwen 3.6 35B MoE on an RTX 3060 12GB via -ncmoe"
 date: 2026-05-09 12:00:00 -0300
 categories: [AI, Engineering]
-tags: [llama.cpp, Qwen, MoE, -ncmoe, LLM, CUDA, RTX3060]
+tags: [llama-cpp, qwen, moe, -ncmoe, llm, cuda, RTX3060]
 description: "How a single flag in llama.cpp turns a 35B Mixture-of-Experts model from OOM to 23 tok/s on a 12GB GPU."
 pin: false
 math: false

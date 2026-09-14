@@ -2,7 +2,7 @@
 title: "Qwen 3.6 27B with Native MTP on llama.cpp"
 date: 2026-05-13 15:54:41 -0300
 categories: [AI, Engineering]
-tags: [llama.cpp, Qwen, MTP, speculative-decoding, GGUF, CUDA, Unsloth]
+tags: [llama-cpp, qwen, mtp, speculative-decoding, gguf, cuda, Unsloth]
 description: "Testing Unsloth's Qwen 3.6 27B MTP GGUF on an RTX 3090 with llama.cpp's MTP branch: native speculative decoding, no draft model, real speedup."
 pin: false
 math: false
