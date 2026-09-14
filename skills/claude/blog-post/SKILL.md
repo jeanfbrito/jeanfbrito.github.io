@@ -128,22 +128,46 @@ Run a redaction sweep over every command, code block, path, and proper noun befo
 
 Path: `$BLOG_REPO/_drafts/YYYY-MM-DD-<slug>.md`
 
-Slug: kebab-case, max 6 words, descriptive. Date: today (the user is in `America/Sao_Paulo`).
+Slug: kebab-case, max 6 words, descriptive.
+
+**Date: always the current clock time, never a guess and never in the future.** Jekyll skips
+posts dated after build time (`Skipping: ... has a future date`), so a hand-written or rounded
+time silently hides the post. Run this and paste its output verbatim into `date:`:
+
+```bash
+TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M:%S %z'
+```
+
+Use the same output's date part for the filename prefix. Do not round to a nice hour, do not
+reuse a time from earlier in the session, and do not infer the time from anything but this
+command.
 
 Front matter (Chirpy):
 
 ```yaml
 ---
 title: <Concrete, specific, no clickbait. Under 60 chars.>
-date: YYYY-MM-DD HH:MM:SS -0300
+date: <output of the date command above, e.g. 2026-09-14 18:28:28 -0300>
 categories: [<top-level>, <sub>] # 1–2 entries, e.g. [AI, Tooling]
-tags: [<5–8 lowercase tags>]
+tags: [<5–8 tags, see tag rules below>]
 description: <140–160 char summary for SEO/social>
 pin: false
 math: false
 mermaid: false
 ---
 ```
+
+**Tag rules.** Chirpy's archive generator slugifies every tag into `/tags/<slug>/`, so two
+spellings that slugify the same way (`Qwen`/`qwen`, `llama.cpp`/`llama-cpp`) produce a
+"Conflict: destination is shared by multiple files" build warning and a broken tag page.
+
+- Lowercase only. Hyphens as the only separator: no dots, spaces, or underscores.
+- Reuse the spelling already in the repo. Before writing tags, list existing ones and pick from
+  them whenever a match exists:
+
+  ```bash
+  grep -hE "^tags:" "$BLOG_REPO"/_posts/*.md | tr -d '[]' | sed 's/^tags: *//' | tr ',' '\n' | sed 's/^ *//' | sort -u
+  ```
 
 Body structure (use H2 for sections):
 
@@ -257,11 +281,25 @@ After writing, output to the user:
 3. **Redaction log**: any line/section where you replaced or omitted content, so the user can verify nothing was over-stripped
 4. **Uncertainty list**: anything you weren't sure was safe to publish — flagged for the user to decide
 5. Suggested categories/tags (so the user can adjust before publish)
-6. Preview command:
+6. **Start the preview server and hand back the draft URL.** Do not just print the command;
+   run it. Follow the `blog-preview` skill's steps: if port 4001 already has a listener, reuse it,
+   otherwise start Jekyll with the Bash tool and `run_in_background: true`:
 
-```bash
-cd "$BLOG_REPO" && bundle exec jekyll s --drafts
-```
+   ```bash
+   cd "$BLOG_REPO" && BUNDLE_PATH=vendor/bundle bundle exec jekyll s --drafts --host 0.0.0.0 --port 4001
+   ```
+
+   Poll `curl -s -o /dev/null -w "%{http_code}" http://localhost:4001/` until it returns `200`,
+   then confirm the draft itself renders (`404` here means Jekyll skipped it, usually a future
+   date or a front-matter error; fix it before reporting):
+
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}" "http://localhost:4001/posts/<slug>/"
+   ```
+
+   Report the direct draft URL, `http://localhost:4001/posts/<slug>/`, as the first line of the
+   summary so the user can open it immediately. Posts use the `/posts/:title/` permalink, where
+   `:title` is the filename slug without the date prefix.
 
 7. Promotion command (do NOT run it — show it):
 

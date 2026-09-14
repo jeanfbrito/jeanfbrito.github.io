@@ -42,6 +42,22 @@ ls -la "$BLOG_REPO/_drafts/"
 
 If the user specified a particular post, skip the listing and go straight to it.
 
+### 1b. Guard against a future date
+
+Jekyll silently drops posts dated after build time (`Skipping: ... has a future date`), so a
+draft with a future `date:` would publish as a commit but never appear on the live site. Check
+before moving:
+
+```bash
+POST_DATE=$(grep -m1 -E "^date:" "$BLOG_REPO/_drafts/YYYY-MM-DD-<slug>.md" | sed 's/^date: *//')
+POST_EPOCH=$(date -j -f "%Y-%m-%d %H:%M:%S %z" "$POST_DATE" +%s 2>/dev/null || date -d "$POST_DATE" +%s)
+[ "$POST_EPOCH" -le "$(date +%s)" ] && echo "date ok" || echo "FUTURE DATE: $POST_DATE"
+```
+
+If it prints `FUTURE DATE`, stop. Re-stamp `date:` with the current time
+(`TZ=America/Sao_Paulo date '+%Y-%m-%d %H:%M:%S %z'`), rename the file if the day changed, and
+re-run the check. Also confirm the filename's `YYYY-MM-DD` prefix matches the `date:` day.
+
 ### 2. Move draft to posts
 
 ```bash
@@ -75,6 +91,7 @@ Tell the user:
 
 - **No drafts available:** tell the user the `_drafts/` directory is empty
 - **Draft filename doesn't match date format:** warn the user — Jekyll requires `YYYY-MM-DD-slug.md`
+- **Draft has a future `date:`:** never publish it as-is; re-stamp with the current time (step 1b)
 - **Git has uncommitted changes in repo:** commit them first or ask the user
 - **Push fails (auth, network):** stop and report the error
 - **User wants to preview before publishing:** suggest `blog-preview` skill instead
