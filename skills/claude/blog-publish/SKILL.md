@@ -84,7 +84,7 @@ git push
 
 Tell the user:
 - Commit hash and message
-- Live URL: `https://jeanfbrito.github.io/YYYY/MM/DD/<slug>.html`
+- Live URL: `https://jeanfbrito.github.io/posts/<slug>/` (Chirpy permalink is `/posts/:title/`; the slug is the filename without the date prefix)
 - Note that GitHub Pages may take 1-2 minutes to deploy
 
 ## Edge cases
