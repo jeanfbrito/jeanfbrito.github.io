@@ -69,13 +69,22 @@ Run this with `run_in_background: true` so Jekyll keeps serving without blocking
 
 ### 4. Wait and verify
 
-Poll until Jekyll is ready, then confirm with a curl:
+Poll until Jekyll is ready, then confirm with a curl that checks the **body size too**:
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}" http://localhost:4001/
+curl -s -o /dev/null -w "%{http_code} %{size_download}" http://localhost:4001/
 ```
 
-A `200` response confirms the server is up.
+A `200` with a body of several KB confirms the server is up. A `200` with a tiny or 0-byte
+body means the running server is stale (its incremental build broke; seen after 13 days of
+uptime on 2026-09-21) — kill it and start fresh:
+
+```bash
+lsof -tiTCP:4001 -sTCP:LISTEN | xargs kill
+```
+
+When the user is looking at one specific draft, run the same size check against
+`http://localhost:4001/posts/<slug>/` — the index can be fine while a new post is blank.
 
 ### 5. Get LAN IP and report back
 
@@ -94,6 +103,7 @@ esac
 ```
 
 Tell the user:
+
 - Local URL: `http://localhost:<port>/`
 - LAN URL: `http://<ip>:<port>/`
 - Drafts are visible (they will NOT appear on the published GitHub Pages site)
@@ -118,7 +128,10 @@ Tell the user:
   ```
 
 - **Port in use by Docker proxy:** switch to 4001 (or next available)
-- **Server already running:** just give the URL, don't start another instance
+- **Server already running:** run the size check from step 4 first. If the body is non-empty,
+  just give the URL and don't start another instance. If it is empty, or the process is older
+  than the newest file in `_posts/`/`_drafts/`, restart it — a long-lived server silently
+  serves blank pages for new drafts
 - **Blog repo missing:** stop and tell the user
 
 ---
