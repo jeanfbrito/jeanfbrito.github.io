@@ -197,7 +197,7 @@ Body structure (use H2 for sections):
 
 **Style guide:**
 
-- 1200–2200 words is the sweet spot. Cut ruthlessly under 1200; split if over 2500.
+- Length follows the content. 1200–2200 words is a reminder, not a cap. A long post is fine when every section earns its place and the post stays easy to read: short sections, tables, code, images and diagrams. Do not cut or split a post only for its word count, and do not flag length or same-day posts in the report. Under 1200 words, check that the post has enough substance.
 - Paragraphs 2–5 sentences. Use H2/H3 for skim-ability.
 - Imperative voice in commands ("Run X", not "You should run X").
 - First person singular ("I") is fine — it is the user's blog.
