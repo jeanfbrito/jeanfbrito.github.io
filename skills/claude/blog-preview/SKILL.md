@@ -76,8 +76,8 @@ curl -s -o /dev/null -w "%{http_code} %{size_download}" http://localhost:4001/
 ```
 
 A `200` with a body of several KB confirms the server is up. A `200` with a tiny or 0-byte
-body means the running server is stale (its incremental build broke; seen after 13 days of
-uptime on 2026-09-21) — kill it and start fresh:
+body means the running server is stale (its incremental build breaks after days of uptime)
+— kill it and start fresh:
 
 ```bash
 lsof -tiTCP:4001 -sTCP:LISTEN | xargs kill

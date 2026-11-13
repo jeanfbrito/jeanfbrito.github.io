@@ -308,7 +308,7 @@ After writing, output to the user:
    Poll `curl -s -o /dev/null -w "%{http_code}" http://localhost:4001/` until it returns `200`,
    then confirm the draft itself renders. Check the **body size, not just the status code**: a
    Jekyll server that has been running for days can emit a 0-byte file for a new draft and
-   still answer `200` (seen 2026-09-21 with a server started 13 days earlier). `404` means
+   still answer `200`. `404` means
    Jekyll skipped the post, usually a future date or a front-matter error.
 
    ```bash
